@@ -1,0 +1,139 @@
+# CONFIGURACIÓN DEL MODELO ESTRUCTURAL EN ETABS (NTP E.060 / E.030 / E.020)
+
+# Unidades: 12 = Ton_m_C
+units: 12
+
+materials:
+  concrete:
+    weight: 2.4            # Tonf/m3
+    poisson: 0.20          # Coeficiente de Poisson
+    thermal_coef: 0.0000099
+    grades:
+      - name: "Concreto 175 kg/cm2 - NTP"
+        fc: 175            # kg/cm2
+      - name: "Concreto 210 kg/cm2 - NTP"
+        fc: 210            # kg/cm2
+      - name: "Concreto 280 kg/cm2 - NTP"
+        fc: 280            # kg/cm2
+
+  rebar:
+    name: "Refuerzo GR60"
+    weight: 7.85           # Tonf/m3
+    fy: 42000              # Tonf/m2 (4200 kg/cm2)
+    fu: 63000              # Tonf/m2 (6300 kg/cm2)
+    fye: 44000             # Tonf/m2
+    fue: 65000             # Tonf/m2
+    e_modulus: 20000000    # Tonf/m2 (2x10^6 kg/cm2)
+    thermal_coef: 0.0000116
+
+sections:
+  columns:
+    default_material: "Concreto 210 kg/cm2 - NTP"
+    items:
+      - name: "Col: 25x25"
+        t3: 0.25
+        t2: 0.25
+        notes: "Columna rectangular centrada 25x25 cm, f'c = 210"
+      - name: "Col: 30x30"
+        t3: 0.30
+        t2: 0.30
+        notes: "Columna rectangular centrada 30x30 cm, f'c = 210"
+      - name: "Col: 30x25"
+        t3: 0.30
+        t2: 0.25
+        notes: "Columna rectangular excentrica 30x25 cm, f'c = 210"
+      - name: "Col: 40x40"
+        t3: 0.40
+        t2: 0.40
+        notes: "Columna rectangular 40x40 cm, f'c = 210"
+      - name: "Col: 40x35"
+        t3: 0.40
+        t2: 0.35
+        notes: "Columna rectangular 40x35 cm, f'c = 210"
+      - name: "Col: 35x30"
+        t3: 0.35
+        t2: 0.30
+        notes: "Columna rectangular 35x30 cm, f'c = 210"
+      - name: "Col: 45x45"
+        t3: 0.45
+        t2: 0.45
+        notes: "Columna rectangular 45x45 cm, f'c = 210"
+      - name: "Col: 50x45"
+        t3: 0.50
+        t2: 0.45
+        notes: "Columna rectangular 50x45 cm, f'c = 210"
+      - name: "Col: 60x60"
+        t3: 0.60
+        t2: 0.60
+        notes: "Columna rectangular 60x60 cm, f'c = 210"
+
+  beams:
+    default_material: "Concreto 210 kg/cm2 - NTP"
+    items:
+      - name: "VP: 65x35 cm"
+        t3: 0.65
+        t2: 0.35
+        notes: "Viga principal 65x35 cm, f'c = 210 kg/cm2"
+      - name: "VS: 55x30 cm"
+        t3: 0.55
+        t2: 0.30
+        notes: "Viga secundaria 55x30 cm, f'c = 210 kg/cm2"
+
+  slabs:
+    items:
+      - name: "Losa aligerada 20 cm"
+        material: "Concreto 210 kg/cm2 - NTP"
+        overall_depth: 0.20        # 20 cm peralte total
+        slab_thickness: 0.05       # 5 cm loseta superior
+        stem_width_top: 0.10       # 10 cm nervio vigueta
+        stem_width_bottom: 0.10    # 10 cm
+        rib_spacing: 0.40          # 40 cm espaciamiento entre ejes de viguetas
+        rib_dir: 1                 # Paralela al eje Local 1 (X)
+        notes: "Losa aligerada h=20cm, loseta 5cm, vigueta 10cm, fc=210 kg/cm2"
+
+structural:
+  diaphragms:
+    prefix: "Piso"
+    semi_rigid: false
+  piers:
+    count: 4
+    prefix: "Muro"
+
+loads:
+  patterns:
+    dead_name: "CM"
+    live_name: "CV"
+    seismic:
+      - name: "SEx"
+      - name: "SEy"
+
+  combinations:
+    linear:
+      - name: "1.4CM+1.7CV"
+        factors: { CM: 1.4, CV: 1.7 }
+      - name: "1.25(CM+CV)+SEx"
+        factors: { CM: 1.25, CV: 1.25, SEx: 1.0 }
+      - name: "1.25(CM+CV)-SEx"
+        factors: { CM: 1.25, CV: 1.25, SEx: -1.0 }
+      - name: "1.25(CM+CV)+SEy"
+        factors: { CM: 1.25, CV: 1.25, SEy: 1.0 }
+      - name: "1.25(CM+CV)-SEy"
+        factors: { CM: 1.25, CV: 1.25, SEy: -1.0 }
+      - name: "0.9CM+SEx"
+        factors: { CM: 0.90, SEx: 1.0 }
+      - name: "0.9CM-SEx"
+        factors: { CM: 0.90, SEx: -1.0 }
+      - name: "0.9CM+SEy"
+        factors: { CM: 0.90, SEy: 1.0 }
+      - name: "0.9CM-SEy"
+        factors: { CM: 0.90, SEy: -1.0 }
+    envelope:
+      name: "ENVOLVENTE"
+
+  mass_source:
+    include_elements: false
+    include_added_mass: false
+    include_loads: true
+    factors:
+      CM: 1.0
+      CV: 0.25
